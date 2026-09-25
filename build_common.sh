@@ -81,7 +81,7 @@ select_toolchain() {
 
   # Create our Whiptail command as a script, then execute it using 'eval'
   # Because we are using eval, we have to redirect the stdout to a file in /tmp
-  WT_CMD="whiptail --title \"Toolchain Selection\" --menu \"Choose the toolchain you want to use.\nPlease refer to file [Toolchain Installs.txt] for how to install.\nBelow are the current toolchains installed under /opt/poky, /opt/arm, /opt/linaro\n\" 0 0 0 \
+  WT_CMD="whiptail --title \"Toolchain Selection\" --menu \"Choose the toolchain you want to use.\nPlease refer to README.md for how to install.\nBelow are the current toolchains installed under /opt/poky, /opt/arm, /opt/linaro\n\" 0 0 0 \
 	$menu_text "
   eval "$WT_CMD 3>&1 1>&2 2>&3" > /tmp/wt_result.txt
   # Read in our selection. We just want the number at the beginning since it will be our index to our array

@@ -175,7 +175,7 @@ MAKE="make -j$BUILD_THREADS O=$OUT"
 
 # If this is the first time building, we need to configure first
 if [ ! -e "$OUT/.config" ] && [ "$1" != "defconfig" ] ; then
-  echo "ERROR: First you must run: ./build.sh k make_config"
+  echo "ERROR: First you must run: ./build.sh k defconfig"
   exit
 fi
 CMD="$MAKE $1 $2 $3"

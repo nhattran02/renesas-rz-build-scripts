@@ -9,7 +9,6 @@ For each MPU, there are different branches.
 
 It is recommended to use the latest software versions.
 
-https://github.com/renesas-rz/rzg2_flash_writer/wiki
 https://github.com/renesas-rz/rzg_trusted-firmware-a/wiki
 https://github.com/renesas-rz/renesas-u-boot-cip/wiki
 https://github.com/renesas-rz/rz_linux-cip/wiki
@@ -20,7 +19,6 @@ Example:
    RZ/G2L SMARC
    VLP/G v3.0.6
 ---------------------------------------------------
-$ git clone --branch rz_g2l          https://github.com/renesas-rz/rzg2_flash_writer
 $ git clone --branch v2.9/rz         https://github.com/renesas-rz/rzg_trusted-firmware-a
 $ git clone --branch v2021.10/rz     https://github.com/renesas-rz/renesas-u-boot-cip
 $ git clone --branch rz-5.10-cip41   https://github.com/renesas-rz/rz_linux-cip
@@ -30,7 +28,6 @@ Example:
    RZ/G3S SMARC
    VLP/G v3.0.6
 ---------------------------------------------------
- (no flash writer code)
 $ git clone --branch 2.7.0/g3s_1.0.0_rc4   https://github.com/renesas-rz/rzg_trusted-firmware-a
 $ git clone --branch v2021.10/rz           https://github.com/renesas-rz/renesas-u-boot-cip
 $ git clone --branch rz-5.10-cip41         https://github.com/renesas-rz/rz_linux-cip
@@ -39,7 +36,6 @@ $ git clone --branch rz-5.10-cip41         https://github.com/renesas-rz/rz_linu
 Example:
    RZ/T2H  according to RZ/T2H BSP V1.01
 -----------------------------------------------------
- (no flash writer code)
 $ git clone --branch v2.3/rzg2l (tag 2.7.0/t2h_n2h_1.0.1)     https://github.com/renesas-rz/rzg_trusted-firmware-a.git
 $ git clone -b v2021.10/rzt2h --single-branch  https://github.com/renesas-rz/renesas-u-boot-cip.git
 $ git clone -b rzt2h-5.10-cip17 --single-branch https://github.com/renesas-rz/rz_linux-cip.git
@@ -49,7 +45,6 @@ $ git clone -b rzt2h-5.10-cip17 --single-branch https://github.com/renesas-rz/rz
 Example:
    RZ/T2H  according to RZ/T2H BSP V1.02
 -----------------------------------------------------
- (no flash writer code)
 $ git clone --branch v2.3/rzg2l (tag 2.7.0/t2h_n2h_1.0.2)     https://github.com/renesas-rz/rzg_trusted-firmware-a.git
 $ git clone -b v2021.10/rzt2h --single-branch  https://github.com/renesas-rz/renesas-u-boot-cip.git
 $ git clone -b rzt2h-5.10-cip17 --single-branch https://github.com/renesas-rz/rz_linux-cip.git
@@ -58,7 +53,6 @@ $ git clone -b rzt2h-5.10-cip17 --single-branch https://github.com/renesas-rz/rz
 Example:
    RZ/V2H SMARC
 -----------------------------------------------------
- (no flash writer code)
 $ git clone --branch 2.7.0/v2h_1.0.4 https://github.com/renesas-rz/rzg_trusted-firmware-a.git
 $ git clone --branch v2021.10/rzv2h https://github.com/renesas-rz/renesas-u-boot-cip.git
 

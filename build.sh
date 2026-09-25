@@ -7,43 +7,23 @@
 # This build script can be used to build
 #  * Trusted Firmware-A
 #  * u-boot
-#  * Renesas Flash Writer
 #  * Linux Kernel
 
-# Please read "Repository Installs.txt" to install the toolchains.
+# Please read "Repository Installs.txt" to install the source repositories.
 
-# Please read "Toolchain Installs.txt" to install the toolchains.
+# Please read README.md to install the toolchains.
 
 # The output files you need will be copied to the 'output_xxxxx' directory. xxx will be the name of your board.
 
-# Supported Boards
-# MACHINE=hihope-rzg2m	# HiHope RZ/G2M
-# MACHINE=hihope-rzg2n	# HiHope RZ/G2N
-# MACHINE=hihope-rzg2h	# HiHope RZ/G2H
-# MACHINE=ek874		# Silicon Linux RZ/G2E
-# MACHINE=smarc-rzg2l	# Renesas RZ/G2L EVK
-#   BOARD_VERSION: DISCRETE, PMIC, WS1
-# MACHINE=smarc-rzg2lc	# Renesas RZ/G2LC EVK
-# MACHINE=smarc-rzg2ul	# Renesas RZ/G2UL EVK
-# MACHINE=smarc-rzv2l	# Renesas RZ/V2L EVK
-#   BOARD_VERSION: DISCRETE, PMIC
-# MACHINE=smarc-rzg3s	# Renesas RZ/G3S EVK
-# MACHINE=rzv2h-evk-1 # Renesas RZ/V2H EVK 
-# MACHINE=smarc-rzg3e	# Renesas RZ/G3E EVK
-# MACHINE=smarc-rzg3e	# Renesas RZ/G3L EVK
-
-
 # Supported MPU
-# RZG2H, RZG2N, RZG2M, RZG2E, RZG2L, RZG2LC, RZG2UL, RZV2L, RZG3S, RZV2H, RZG3E, RZG3L
+# RZG2H, RZG2N, RZG2M, RZG2E, RZG2L, RZG2LC, RZG2UL, RZV2L, RZG3S, RZT2H, RZV2H, RZV2N, RZG3E, RZG3L
 
 #----------------------------------------------
 # Default Settings
 #----------------------------------------------
 TFA_DIR_DEFAULT=rzg_trusted-firmware-a
 UBOOT_DIR_DEFAULT=renesas-u-boot-cip
-FW_DIR_DEFAULT=rzg2_flash_writer
 KERNEL_DIR_DEFAULT=rz_linux-cip
-OUT_DIR=output_${MACHINE}
 TFA_FIP=0
 MPU=RZG2L
 
@@ -56,34 +36,6 @@ else
   source build_common.sh
 fi
 
-# $1 = env variable to save
-# $2 = value
-# Remember, we we share this file with other scripts, so we only want to change
-# the lines used by this script
-save_setting() {
-
-
-  if [ ! -e $SETTINGS_FILE ] ; then
-    touch $SETTINGS_FILE # create file if does not exit
-  fi
-
-  # Do not change the file if we did not make any changes
-  grep -q "^$1=$2$" $SETTINGS_FILE
-  if [ "$?" == "0" ] ; then
-    return
-  fi
-
-  sed '/^'"$1"'=/d' -i $SETTINGS_FILE
-  echo  "$1=$2" >> $SETTINGS_FILE
-
-  # Delete empty or blank lines
-  sed '/^$/d' -i $SETTINGS_FILE
-
-  # Sort the file to keep the same order
-  sort -o $SETTINGS_FILE $SETTINGS_FILE
-}
-
-
 # Save Settings to file
 # Since each sub-script will want to save their settings, we will keep a common interface in this file.
 if [ "$1" == "save_setting" ] ; then
@@ -93,9 +45,7 @@ if [ "$1" == "save_setting" ] ; then
     exit
   fi
 
-  # Call the function in this file
   save_setting "$2" "$3"
-
   exit
 fi
 
@@ -136,17 +86,25 @@ Board: $MACHINE $BOARD_VERSION_TEXT
 
 Please select what you want to build:
 
-  ./build.sh f                       # Build Renesas Flash Writer
   ./build.sh t                       # Build Trusted Firmware-A
   ./build.sh u                       # Build u-boot
   ./build.sh k                       # Build Linux Kernel
-  ./build.sh m                       # Build Linux Kernel multimedia modules
 
   ./build.sh s                       # Setup - Choose board and build options
   ./build.sh tc                      # Toolchain - Change just the Toolchain selection
 "
   exit
 fi
+
+# Ask for PMIC or Discrete power board version (RZ/G2L, RZ/V2L)
+select_board_version() {
+  whiptail --yesno --yes-button PMIC_Power --no-button Discrete_Power "Board Version:\n\nIs the board 'PMIC Power' version or the 'Discrete Power' version?\n\nThe PMIC version has \"Reneas\" printed in the middle of the SOM board.\nThe Discrete version has \"Renesas\" printed at the edge of the SOM baord.   " 0 0 0
+  if [ "$?" == "0" ] ; then
+    BOARD_VERSION="PMIC"
+  else
+    BOARD_VERSION="DISCRETE"
+  fi
+}
 
 if [ "$1" == "s" ] ; then
 
@@ -164,47 +122,29 @@ if [ "$1" == "s" ] ; then
 	"8  smarc-rzv2l" "Renesas SMARC RZ/V2L" \
 	"9  smarc-rzg3s" "Renesas SMARC RZ/G3S" \
 	"A  rzt2h-dev"   "Renesas DEV RZ/T2H" \
-    "B  rzv2h-evk-ver1" "Renesas EVK RZ/V2H" \
+	"B  rzv2h-evk-ver1" "Renesas EVK RZ/V2H" \
 	"C  rzv2n-evk" "Renesas EVK RZ/V2N" \
-  "D  smarc-rzg3e" "Renesas SMARC RZ/G3E" \
-  "E  smarc-rzg3l" "Renesas SMARC RZ/G3L" \
+	"D  smarc-rzg3e" "Renesas SMARC RZ/G3E" \
+	"E  smarc-rzg3l" "Renesas SMARC RZ/G3L" \
 	3>&1 1>&2 2>&3)
   RET=$?
   if [ $RET -eq 0 ] ; then
     BOARD_VERSION=""  # Clear out BOARD_VERSION in case there is not one
     case "$SELECT" in
-      1\ *) FW_BOARD=HIHOPE ; MACHINE=hihope-rzg2m ; MPU=RZG2M ;;
-      2\ *) FW_BOARD=HIHOPE ; MACHINE=hihope-rzg2n ; MPU=RZG2N ;;
-      3\ *) FW_BOARD=HIHOPE ; MACHINE=hihope-rzg2h ; MPU=RZG2H ;;
-      4\ *) FW_BOARD=EK874 ; MACHINE=ek874 ; MPU=RZG2E ;;
-      5\ *) FW_BOARD=RZG2L_SMARC ; MACHINE=smarc-rzg2l ; MPU=RZG2L ; TFA_FIP=1
-	whiptail --yesno --yes-button PMIC_Power --no-button Discrete_Power "Board Version:\n\nIs the board 'PMIC Power' version or the 'Discrete Power' version?\n\nThe PMIC version has \"Reneas\" printed in the middle of the SOM board.\nThe Discrete version has \"Renesas\" printed at the edge of the SOM baord.   " 0 0 0
-	if [ "$?" == "0" ] ; then
-		BOARD_VERSION="PMIC"
-		FW_BOARD=RZG2L_SMARC_PMIC
-	else
-		BOARD_VERSION="DISCRETE"
-		FW_BOARD=RZG2L_SMARC
-	fi
-      ;;
-      6\ *) FW_BOARD=RZG2LC_SMARC ; MACHINE=smarc-rzg2lc ; MPU=RZG2LC ; TFA_FIP=1 ;;
-      7\ *) FW_BOARD=RZG2UL_SMARC ; MACHINE=smarc-rzg2ul ; MPU=RZG2UL ; TFA_FIP=1 ;;
-      8\ *) FW_BOARD=RZV2L_SMARC ; MACHINE=smarc-rzv2l ; MPU=RZV2L ; TFA_FIP=1
-	whiptail --yesno --yes-button PMIC_Power --no-button Discrete_Power "Board Version:\n\nIs the board 'PMIC Power' version or the 'Discrete Power' version?\n\nThe PMIC version has \"Reneas\" printed in the middle of the SOM board.\nThe Discrete version has \"Renesas\" printed at the edge of the SOM baord.   " 0 0 0
-	if [ "$?" == "0" ] ; then
-		BOARD_VERSION="PMIC"
-		FW_BOARD=RZV2L_SMARC_PMIC
-	else
-		BOARD_VERSION="DISCRETE"
-		FW_BOARD=RZV2L_SMARC
-	fi
-      ;;
-      A\ *) FW_BOARD=RZT2H_DEV ; MACHINE=rzt2h-dev ; MPU=RZT2H ; TFA_FIP=1 ;;
-      9\ *) FW_BOARD=RZG3S_SMARC ; MACHINE=smarc-rzg3s ; MPU=RZG3S ; TFA_FIP=1 ;;
-      B\ *) FW_BOARD=RZV2H_EVK ; MACHINE=rzv2h-evk-ver1 ; MPU=RZV2H ; TFA_FIP=1 ;;
-      C\ *) FW_BOARD=RZV2N_EVK ; MACHINE=rzv2n-evk ; MPU=RZV2N ; TFA_FIP=1 ;;
-      D\ *) FW_BOARD=RZG3E_SMARC ; MACHINE=smarc-rzg3e ; MPU=RZG3E ; TFA_FIP=1 ;;
-      E\ *) FW_BOARD=RZG3L_SMARC ; MACHINE=smarc-rzg3l ; MPU=RZG3L ; TFA_FIP=1 ;;
+      1\ *) MACHINE=hihope-rzg2m ; MPU=RZG2M ;;
+      2\ *) MACHINE=hihope-rzg2n ; MPU=RZG2N ;;
+      3\ *) MACHINE=hihope-rzg2h ; MPU=RZG2H ;;
+      4\ *) MACHINE=ek874 ; MPU=RZG2E ;;
+      5\ *) MACHINE=smarc-rzg2l ; MPU=RZG2L ; TFA_FIP=1 ; select_board_version ;;
+      6\ *) MACHINE=smarc-rzg2lc ; MPU=RZG2LC ; TFA_FIP=1 ;;
+      7\ *) MACHINE=smarc-rzg2ul ; MPU=RZG2UL ; TFA_FIP=1 ;;
+      8\ *) MACHINE=smarc-rzv2l ; MPU=RZV2L ; TFA_FIP=1 ; select_board_version ;;
+      9\ *) MACHINE=smarc-rzg3s ; MPU=RZG3S ; TFA_FIP=1 ;;
+      A\ *) MACHINE=rzt2h-dev ; MPU=RZT2H ; TFA_FIP=1 ;;
+      B\ *) MACHINE=rzv2h-evk-ver1 ; MPU=RZV2H ; TFA_FIP=1 ;;
+      C\ *) MACHINE=rzv2n-evk ; MPU=RZV2N ; TFA_FIP=1 ;;
+      D\ *) MACHINE=smarc-rzg3e ; MPU=RZG3E ; TFA_FIP=1 ;;
+      E\ *) MACHINE=smarc-rzg3l ; MPU=RZG3L ; TFA_FIP=1 ;;
       *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
     esac || whiptail --msgbox "There was an error running option $SELECT" 20 60 1
   else
@@ -224,7 +164,6 @@ if [ "$1" == "s" ] ; then
   # Save our default directories
   save_setting TFA_DIR $TFA_DIR_DEFAULT
   save_setting UBOOT_DIR $UBOOT_DIR_DEFAULT
-  save_setting FW_DIR $FW_DIR_DEFAULT
   save_setting KERNEL_DIR $KERNEL_DIR_DEFAULT
 
   # The board
@@ -232,11 +171,6 @@ if [ "$1" == "s" ] ; then
   save_setting OUT_DIR output_${MACHINE}
   save_setting BOARD_VERSION $BOARD_VERSION
   save_setting MPU $MPU
-
-  # Set defaults for Flash Writer script
-  save_setting FW_BOARD $FW_BOARD
-
-  # Set defaults for Flash Writer script
   save_setting TFA_FIP $TFA_FIP
 
   exit
@@ -253,24 +187,9 @@ if [ "$1" == "tc" ] ; then
 fi
 
 # Call individual sub-scripts
-if [ "$1" == "t" ] ; then
-  ./build_tfa.sh $2 $3 $4
-  exit
-fi
-if [ "$1" == "u" ] ; then
-  ./build_uboot.sh $2 $3 $4
-  exit
-fi
-if [ "$1" == "f" ] ; then
-  ./build_flashwriter.sh $2 $3 $4
-  exit
-fi
-if [ "$1" == "k" ] ; then
-  ./build_kernel.sh $2 $3 $4
-  exit
-fi
-if [ "$1" == "m" ] ; then
-  ./build_mm.sh $2 $3 $4
-  exit
-fi
-
+case "$1" in
+  t) ./build_tfa.sh $2 $3 $4 ;;
+  u) ./build_uboot.sh $2 $3 $4 ;;
+  k) ./build_kernel.sh $2 $3 $4 ;;
+  *) echo -e "\nERROR: Unknown command \"$1\". Run \"./build.sh\" for help.\n" ;;
+esac

@@ -1,6 +1,6 @@
 # RZ Build Scripts
 
-* These scripts allow you to build BSP software components outside of the Yocto build environment.
+* These scripts allow you to build Trusted Firmware-A, u-boot and the Linux kernel outside of the Yocto build environment.
 * The following boards are supported:
 
 <table cellpadding=2 border=1 style="border:1px solid black; border-collapse: collapse;">
@@ -53,9 +53,7 @@
 * For example:
 <pre>
 └── rz_build_scripts/
-    ├── mbedtls/                   <<<<<< you add
     ├── renesas-u-boot-cip/        <<<<<< you add
-    ├── rzg2_flash_writer/         <<<<<< you add
     ├── rzg_trusted-firmware-a/    <<<<<< you add
     ├── rz_linux-cip/              <<<<<< you add
     ├── build.sh
@@ -99,7 +97,6 @@ Example:
 <pre>
 $ ./build.sh s             # Select your target board
 $ ./build.sh               # Show a list of command options
-$ ./build.sh f             # Build flash writer
 $ ./build.sh u             # Build u-boot
 $ ./build.sh t             # Build trusted firmware
 $ ./build.sh k             # Build Linux kernel
@@ -122,11 +119,6 @@ The procedure is as follows:
 **OUT_DIR=output\_xxxx**
 
 * This is the directory where all the output files from each build are copied to.
-
-**FW_BOARD=xxxx**
-
-* Flash Writer does not use the MACHINE name for building. Instead, it uses board BOARD=xxxx.
-* Make this setting match what you want to pass as BOARD=xxxx on the build command line
 
 3) Create Configuration Files
 

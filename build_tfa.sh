@@ -176,10 +176,20 @@ do_debug_menu() {
     
       # Build the bptool
       echo -e "\n[Building bp tool]"
-      if [ "$PLATFORM" == "g3s" ] ; then  
-        cd tools/renesas/rz_boot_param/${PLATFORM}
-        make PLAT=${PLATFORM}
-        cd ../../../..
+      if [ "$PLATFORM" == "g3s" ] ; then
+        if [ -d tools/renesas/rz_boot_param/${PLATFORM} ] ; then
+          # TF-A v2.7: bptool in tools/renesas/rz_boot_param/g3s/
+          G3S_BPTOOL=../../../tools/renesas/rz_boot_param/bptool
+          cd tools/renesas/rz_boot_param/${PLATFORM}
+          make PLAT=${PLATFORM}
+          cd ../../../..
+        else
+          # TF-A v2.10+: common bptool in tools/renesas/rz_boot_param/
+          G3S_BPTOOL=../../../tools/renesas/bptool
+          cd tools/renesas/rz_boot_param
+          make
+          cd ../../..
+        fi
       fi
       if [ "$PLATFORM" == "v2h" ] || [ "$PLATFORM" == "v2n" ] ; then  
         cd tools/renesas/rz_boot_param
@@ -203,7 +213,7 @@ do_debug_menu() {
       fi
       # Create bl2_bp.bin
       if [ "$PLATFORM" == "g3s" ] ; then 
-        ../../../tools/renesas/rz_boot_param/bptool bl2.bin bootparams.bin 0xA3000 $BMODE
+        $G3S_BPTOOL bl2.bin bootparams.bin 0xA3000 $BMODE
         if [ "bl2.bin" -nt "bl2_bp.bin" ] || [ ! -e "bl2_bp.bin" ] ; then
           echo -e "\n[Adding bootparams.bin to bl2.bin]"
           cat bootparams.bin bl2.bin > bl2_bp.bin
